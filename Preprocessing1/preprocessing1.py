@@ -3,11 +3,11 @@ import numpy as np
 import pandas as pd
 from sklearn.ensemble import IsolationForest
 
-datasets = ['../Datasets/2019new.parquet','../Datasets/2019newBig.parquet']
+datasets = ['../Datasets/Small_dataset.parquet','../Datasets/Big_dataset.parquet']
 for dataset in datasets:
     if os.path.exists(dataset):
         # Load the CSV using dask for parallel processing
-        df = pd.read_csv(dataset)
+        df = pd.read_parquet(dataset)
 
         # Drop rows where 'trip_distance' is 0 and 'fare_amount' is <= 0
         df = df.drop(df[(df['trip_distance'] <= 0)].index)
@@ -141,5 +141,5 @@ for dataset in datasets:
     # Check the result
     print("Original DataFrame shape:", new_df.shape)
     print("Cleaned DataFrame shape:", new_df_clean.shape)
-    dataset_path= dataset[:-4] + 'Preprocessed1.parquet'
+    dataset_path= dataset[:-8] + 'Preprocessed1.parquet'
     new_df_clean.to_parquet(dataset_path)

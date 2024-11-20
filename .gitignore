@@ -163,7 +163,4 @@ cython_debug/
 
 
 # Datasets
-Datasets/2019new.csv
-Datasets/2019newBig.csv
-Datasets/2019newP*
-Datasets/2019newBigP*
+Datasets/*.parquet
