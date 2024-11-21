@@ -67,7 +67,7 @@ if __name__ == '__main__':
 
     
 
-    dataset = '../Datasets/Small_datasetPreprocessed1.parquet'
+    dataset = '../Datasets/Big_datasetPreprocessed1.parquet'
 
     if os.path.exists(dataset):
         df = pd.read_parquet(dataset)
@@ -119,7 +119,7 @@ if __name__ == '__main__':
         print(f"Test R² Score: {r2:.4f}")
 
     # Load the entire model and evaluate it
-    model_filepath = 'Models/model_LargeNN.pth'  # Replace with your .pth file path
+    model_filepath = 'model_LargeNN.pth'  # Replace with your .pth file path
     loaded_model = load_entire_model(model_filepath,input_size)
 
     # Assume test_loader is defined as before
