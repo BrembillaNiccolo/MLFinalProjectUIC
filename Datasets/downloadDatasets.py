@@ -50,5 +50,4 @@ def convert_sqlite_to_parquet(sqlite_directory, output_directory):
 output_path = os.path.join(os.getcwd(), 'parquet_files')  # Save in 'parquet_files' folder in the current directory
 path=os.path.join(path, '2019')
 convert_sqlite_to_parquet(path, output_path)
-
 print("All CSV files have been converted to Parquet format.")
