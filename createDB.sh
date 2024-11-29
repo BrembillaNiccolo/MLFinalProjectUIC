@@ -64,13 +64,10 @@ main() {
     # Step 1: Download datasets
     run_python_script "downloadDatasets.py"
 
-    # Step 2: Create the Big Parquet file
-    run_python_script "FromFullDatasetToBigParquet.py"
+    # Step 2: Create parquet databases
+    run_python_script "FromFullDatasetToSampledParquet.py"
 
-    # Step 3: Create the Small Parquet file
-    run_python_script "FromFullDatasetToSmallParquet.py"
-
-    # Step 4: Delete the Parquet files directory
+    # Step 3: Delete the Parquet files directory
     echo "Deleting parquet file directory..."
     rm -rf parquet_files
     if [ $? -eq 0 ]; then
@@ -80,7 +77,7 @@ main() {
         exit 1
     fi
 
-    # Step 5: Navigate back to the parent directory
+    # Step 4: Navigate back to the parent directory
     echo "Returning to the parent directory..."
     cd .. || { echo "Failed to return to parent directory. Exiting."; exit 1; }
 

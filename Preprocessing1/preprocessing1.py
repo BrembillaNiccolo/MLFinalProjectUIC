@@ -3,14 +3,21 @@ import numpy as np
 import pandas as pd
 from sklearn.ensemble import IsolationForest
 
+#For each dataset, we will load the data, clean it, merge it with the weather and holidays data, merge it with the city zones data, and remove outliers using the Isolation Forest model.
 datasets = ['../Datasets/Small_dataset.parquet','../Datasets/Big_dataset.parquet']
 for dataset in datasets:
     if os.path.exists(dataset):
-        # Load the CSV using dask for parallel processing
+        # Load the parquet dataset
         df = pd.read_parquet(dataset)
 
-        # Drop rows where 'trip_distance' is 0 and 'fare_amount' is <= 0
+        # Drop rows with trip_distance <= 0
         df = df.drop(df[(df['trip_distance'] <= 0)].index)
+
+        # Drop rows with fare_amount <= 0
+        df = df[df['fare_amount'] > 0]
+        #df = df[df['fare_amount'] <= 100]
+
+        # Drop all the not needed columns
         df = df.drop(['total_amount'], axis=1)
         df = df.drop(['extra'], axis=1)
         df = df.drop(['mta_tax'], axis=1)
@@ -20,43 +27,39 @@ for dataset in datasets:
         df = df.drop(['congestion_surcharge'], axis=1)
         df = df.drop(['store_and_fwd_flag'], axis=1)
         df = df.drop(['payment_type'], axis=1)
-        df = df[df['fare_amount'] > 0]
-        #df = df[df['fare_amount'] <= 100]
+        
 
         # Convert 'tpep_pickup_datetime' and 'tpep_dropoff_datetime' to datetime
         df['tpep_pickup_datetime'] = pd.to_datetime(df['tpep_pickup_datetime'])
         df['tpep_dropoff_datetime'] = pd.to_datetime(df['tpep_dropoff_datetime'])
-        print("Datetime conversion completed:")
-        print(df[['tpep_pickup_datetime', 'tpep_dropoff_datetime']].head())
 
         # Extract date and hour from 'tpep_pickup_datetime'
         df['pickup_date'] = df['tpep_pickup_datetime'].dt.date
         df['pickup_hour'] = df['tpep_pickup_datetime'].dt.hour
-        print("\nExtracted 'pickup_date' and 'pickup_hour':")
-        print(df[['pickup_date', 'pickup_hour']].head())
 
         # Calculate time spent in the taxi in minutes
         df['time_in_taxi'] = (df['tpep_dropoff_datetime'] - df['tpep_pickup_datetime']).dt.total_seconds() / 60
-        print("\nCalculated 'time_in_taxi':")
-        print(df[['time_in_taxi']].head())
 
         # Drop unneeded columns
         df = df.drop(['tpep_pickup_datetime', 'tpep_dropoff_datetime'], axis=1)
         print("\nDropped 'tpep_pickup_datetime' and 'tpep_dropoff_datetime' columns:")
-        print(df.head())
+        
+        # Drop rows with time_in_taxi <= 0 (negative values are not possible)
         df = df[df['time_in_taxi'] > 0]
     else:
         print("Dataset not found")
 
     # Merging the weather and holidays data
     weather = pd.read_csv('../Datasets/weather.csv')
-
-    weather=weather.drop(columns=['tmax','tmin','departure','HDD','CDD'])
-    weather['date'] = pd.to_datetime(weather['date'])
-
     holidays = pd.read_csv('../Datasets/USHoliday.csv')
 
-    #maintain only if holiday is in 2019
+    # Drop columns not needed
+    weather=weather.drop(columns=['tmax','tmin','departure','HDD','CDD'])
+
+    # Convert 'date' to datetime to match the 'pickup_date' column
+    weather['date'] = pd.to_datetime(weather['date']) 
+
+    # Maintain only holidays in 2019
     holidays['Date'] = pd.to_datetime(holidays['Date'])
     holidays=holidays[holidays['Date'].dt.year==2019]
 
@@ -73,10 +76,12 @@ for dataset in datasets:
     # Ensure the pickup_date column is in datetime64[ns] format
     df['pickup_date'] = pd.to_datetime(df['pickup_date'])
 
+    # Merge the datasets on 'pickup_date' and 'date'
     new_df = pd.merge(df, weather, how='left', left_on='pickup_date', right_on='date')
 
     new_df = new_df.drop(['date'], axis=1)
-    #add column 1 if week day, 2 if weekend, 3 if holiday
+
+    #Add day_time column: 1 if week day, 2 if weekend, 3 if holiday
     new_df['holiday'] = new_df['pickup_date'].isin(holidays['Date']).astype(int)
     new_df['day_of_week'] = new_df['pickup_date'].dt.dayofweek
     new_df['day_type'] = np.where(new_df['day_of_week'] < 5, 1, 2)
@@ -100,38 +105,19 @@ for dataset in datasets:
     pulocation = new_df.merge(zones[['LocationID', 'service_zone']], left_on='pulocationid', right_on='LocationID', how='left')
     dolocation = pulocation.merge(zones[['LocationID', 'service_zone']], left_on='dolocationid', right_on='LocationID', how='left', suffixes=('_pulocation', '_dolocation'))
 
-    # Create a new column 'zone_type' based on the conditions
-    def get_zone_type(row):
-        service_zone_pulocation = row['service_zone_pulocation']
-        service_zone_dolocation = row['service_zone_dolocation']
-
-        if service_zone_pulocation == 'Airports' or service_zone_dolocation == 'Airports':
-            return 1
-        elif 'Boro Zone' in [service_zone_pulocation, service_zone_dolocation]:
-            return 2
-        elif 'Yellow Zone' in [service_zone_pulocation, service_zone_dolocation]:
-            return 3
-        else:
-            return None
-
-    # Apply the zone_type function to the merged dataframe
-    #dolocation['zone_type'] = dolocation.apply(get_zone_type, axis=1)
-
     # Remove rows where 'zone_type' is None (rows that don't meet any of the conditions)
     new_df = dolocation
-    print(new_df.head(1))
     new_df = new_df.drop(['pulocationid'], axis=1)
     new_df = new_df.drop(['dolocationid'], axis=1)
     new_df = new_df.drop(['LocationID_pulocation'], axis=1)
     new_df = new_df.drop(['LocationID_dolocation'], axis=1)
-    #new_df = new_df.drop(['service_zone_pulocation'], axis=1)
-    #new_df = new_df.drop(['service_zone_dolocation'], axis=1)
+    
+    # Replace 'service_zone' with numerical values
     new_df[['service_zone_pulocation', 'service_zone_dolocation']] = new_df[['service_zone_pulocation', 'service_zone_dolocation']].replace({'Airports': 1, 'Boro Zone': 2, 'Yellow Zone': 3})
     new_df = new_df.dropna()
-    print(new_df.head(1))
-    print(new_df.shape)    
 
     # Create and fit the Isolation Forest model
+    # In order to remove outliers, we will use the Isolation Forest model from scikit-learn.
     iso_forest = IsolationForest(contamination=0.05, random_state=42)  # Adjust 'contamination' as needed
     outliers_pred = iso_forest.fit_predict(new_df)
 
@@ -141,5 +127,6 @@ for dataset in datasets:
     # Check the result
     print("Original DataFrame shape:", new_df.shape)
     print("Cleaned DataFrame shape:", new_df_clean.shape)
+    print(new_df_clean.head(1))
     dataset_path= dataset[:-8] + 'Preprocessed1.parquet'
     new_df_clean.to_parquet(dataset_path)

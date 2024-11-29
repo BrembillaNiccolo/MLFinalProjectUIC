@@ -4,7 +4,7 @@ import pandas as pd
 from sklearn.ensemble import IsolationForest
 
         # goes here
-datasets = ['../Datasets/Small_dataset.parquet']
+datasets = ['../Datasets/Small_dataset.parquet','../Datasets/Big_dataset.parquet']
 for dataset in datasets:
     if os.path.exists(dataset):
         # Load the CSV using dask for parallel processing
@@ -25,6 +25,7 @@ for dataset in datasets:
         df = df.drop(['payment_type'], axis=1)
         # df = df.drop(['fare_amount'], axis=1)
         df = df[df['fare_amount'] > 0]
+        df = df.drop(['fare_amount'], axis=1)
         #df = df[df['fare_amount'] <= 100]
 
 

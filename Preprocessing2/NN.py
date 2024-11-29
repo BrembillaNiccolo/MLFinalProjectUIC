@@ -72,7 +72,7 @@ class NYCTaxiDataset(Dataset):
 # %%
 
 if __name__ == '__main__':
-    dataset = '../Datasets/Small_datasetPreprocessed1.parquet'
+    dataset = '../Datasets/Small_datasetPreprocessed2.parquet'
 
     if os.path.exists(dataset):
         df = pd.read_parquet(dataset)
@@ -89,8 +89,8 @@ if __name__ == '__main__':
 
     # Preprocess the data
     input_size = df.shape[1] - 1
-    X = df.drop(['fare_amount'], axis=1).values
-    y = df['fare_amount'].values
+    X = df.drop(['total_amount'], axis=1).values
+    y = df['total_amount'].values
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
     scaler = StandardScaler()
@@ -121,7 +121,7 @@ if __name__ == '__main__':
     scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=3)
 
     # Training loop with TF32 enabled
-    def train_model(model, train_loader, num_epochs=5):
+    def train_model(model, train_loader, num_epochs=20):
         model.train()
         for epoch in range(num_epochs):
             running_loss = 0.0
