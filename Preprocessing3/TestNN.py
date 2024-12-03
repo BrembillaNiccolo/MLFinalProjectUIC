@@ -130,7 +130,7 @@ if __name__ == '__main__':
         diff = [actuals[i] - predictions[i] for i in range(len(actuals))]
         plt.plot(diff, label='Difference between actual and predicted values')
         plt.legend()
-
+        plt.title('Difference between actual and predicted values in the Neural Network')
         # Save the plot 
         plt.savefig('nn_plot.png')
 
@@ -147,7 +147,37 @@ if __name__ == '__main__':
         colors = ['#16537e', '#cc0010', '#f1c232']
         plt.bar(x, scores, color=colors)
         plt.xticks(x, labels)
+        plt.title('Neural Network Scores')
         plt.savefig('nn_scores.png')
+
+        #count when difference between actual and predicted values is less than 1, 5, 10, 20, 50, 100,over 100
+        count_values = [1, 5, 10, 20,50,100]
+        count = [0, 0, 0, 0, 0, 0]
+        for i in range(len(diff)):
+            if abs(diff[i]) < 1:
+                count[0] += 1
+            elif abs(diff[i]) < 5:
+                count[1] += 1
+            elif abs(diff[i]) < 10:
+                count[2] += 1
+            elif abs(diff[i]) < 20:
+                count[3] += 1
+            elif abs(diff[i]) < 50:
+                count[4] += 1
+            elif abs(diff[i]) < 100:
+                count[5] += 1
+            else:
+                count[6] += 1
+        
+        print(count)
+        for i in range(len(count)):
+            count[i] = count[i] / len(diff) * 100
+            if i < 5:
+                print(f"Percentage of values with difference between {0 if i == 0 else count_values[i-1]} and {count_values[i]}: {count[i]:.4f}%")
+            else:
+                print(f"Percentage of values with difference over 100: {count[i]:.4f}%")
+
+
 
 
     # Load the entire model and evaluate it

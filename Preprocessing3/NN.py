@@ -121,7 +121,7 @@ if __name__ == '__main__':
     scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=3)
 
     # Training loop with TF32 enabled
-    def train_model(model, train_loader, num_epochs=25):
+    def train_model(model, train_loader, num_epochs=50):
         model.train()
         for epoch in range(num_epochs):
             running_loss = 0.0

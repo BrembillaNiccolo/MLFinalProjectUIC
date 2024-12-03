@@ -2,8 +2,9 @@ import os
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import IsolationForest
+import matplotlib.pyplot as plt
+import seaborn as sns
 
-        # goes here
 datasets = ['../Datasets/Small_dataset.parquet','../Datasets/Big_dataset.parquet']
 for dataset in datasets:
     if os.path.exists(dataset):
@@ -53,7 +54,19 @@ for dataset in datasets:
         df = df[df['time_in_taxi'] > 0]
     else:
         print("Dataset not found")
-
+    #print the data distribution over base on pickup_date as a line plot only in 2019
+    plt.figure(figsize=(12, 6))
+    plt.plot(df['pickup_date'].value_counts().sort_index())
+    plt.title('Distribution of Pickup Date')
+    plt.xlim(pd.Timestamp('2019-01-01'), pd.Timestamp('2019-12-31'))
+    plt.savefig('pickup_date_distribution.png')
+    plt.show()
+    #print the data distribution over base on pickup_hour
+    plt.figure(figsize=(12, 6))
+    plt.plot(df['pickup_hour'].value_counts().sort_index())
+    plt.title('Distribution of Pickup Hour')
+    plt.savefig('pickup_hour_distribution.png')
+    plt.show()
     # Merging the weather and holidays data
     weather = pd.read_csv('../Datasets/weather.csv')
 

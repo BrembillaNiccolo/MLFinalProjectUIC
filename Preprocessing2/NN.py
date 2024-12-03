@@ -117,11 +117,11 @@ if __name__ == '__main__':
         model = nn.DataParallel(model)
 
     criterion = nn.MSELoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-5)
+    optimizer = optim.AdamW(model.parameters(), lr=0.001, weight_decay=1e-5)
     scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=3)
 
     # Training loop with TF32 enabled
-    def train_model(model, train_loader, num_epochs=20):
+    def train_model(model, train_loader, num_epochs=25):
         model.train()
         for epoch in range(num_epochs):
             running_loss = 0.0
@@ -156,7 +156,6 @@ if __name__ == '__main__':
                 predictions.extend(outputs.cpu().numpy())
                 actuals.extend(labels.cpu().numpy())
 
-        mse = mean_squared_error(actuals, predictions)
         mse = mean_squared_error(actuals, predictions)
         mae = mean_absolute_error(actuals, predictions)  # Calculate MAE
         r2 = r2_score(actuals, predictions)  # Calculate R² score

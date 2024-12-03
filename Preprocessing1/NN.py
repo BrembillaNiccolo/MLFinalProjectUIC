@@ -117,11 +117,11 @@ if __name__ == '__main__':
         model = nn.DataParallel(model)
 
     criterion = nn.MSELoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-5)
+    optimizer = optim.AdamW(model.parameters(), lr=0.001, weight_decay=1e-5)
     scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=3)
 
     # Training loop with TF32 enabled
-    def train_model(model, train_loader, num_epochs=5):
+    def train_model(model, train_loader, num_epochs=100):
         model.train()
         for epoch in range(num_epochs):
             running_loss = 0.0

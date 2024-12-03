@@ -67,7 +67,7 @@ if __name__ == '__main__':
 
     
 
-    dataset = '../Datasets/Big_datasetPreprocessed1.parquet'
+    dataset = '../Datasets/Small_datasetPreprocessed1.parquet'
 
     if os.path.exists(dataset):
         df = pd.read_parquet(dataset)
@@ -82,12 +82,14 @@ if __name__ == '__main__':
     X = df.drop(['fare_amount'], axis=1).values
     y = df['fare_amount'].values
 
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
     scaler = StandardScaler()
-    X_train = scaler.fit(X)
-    X_test = scaler.transform(X)
+    X_train = scaler.fit_transform(X_train)
+    X_test = scaler.transform(X_test)
 
     X_test = torch.FloatTensor(X_test)
-    y_test = torch.FloatTensor(y).view(-1, 1)
+    y_test = torch.FloatTensor(y_test).view(-1, 1)
 
     test_dataset = NYCTaxiDataset(X_test, y_test)
 
@@ -117,6 +119,32 @@ if __name__ == '__main__':
         print(f"Test RMSE: {mse ** 0.5:.2f}")
         print(f"Test MAE: {mae:.2f}")
         print(f"Test R² Score: {r2:.4f}")
+
+        #put in a plot the difference between the actual and predicted values
+        import matplotlib.pyplot as plt
+        plt.figure(figsize=(10, 5))
+        diff = [actuals[i] - predictions[i] for i in range(len(actuals))]
+        plt.plot(diff, label='Difference between actual and predicted values')
+        plt.legend()
+
+        # Save the plot 
+        plt.savefig('nn_plot.png')
+
+        #PLOT THE SCORES (MAE,MSE AND R2) IN HISTOGRAMS
+        import matplotlib.pyplot as plt
+        import numpy as np
+        plt.figure(figsize=(10, 5))
+        scores = [mse, mae, r2]
+        labels = ['MSE', 'MAE', 'R²']
+        x = np.arange(len(labels))
+        #put different colors to the bars and put values above the bar
+        for i in range(len(scores)):
+            plt.text(x[i], scores[i], str(round(scores[i], 4)), ha='center')
+        colors = ['#16537e', '#cc0010', '#f1c232']
+        plt.bar(x, scores, color=colors)
+        plt.xticks(x, labels)
+        plt.savefig('nn_scores.png')
+
 
     # Load the entire model and evaluate it
     model_filepath = 'model_LargeNN.pth'  # Replace with your .pth file path
