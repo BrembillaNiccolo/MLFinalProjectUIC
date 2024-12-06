@@ -72,7 +72,7 @@ class NYCTaxiDataset(Dataset):
 # %%
 
 if __name__ == '__main__':
-    dataset = '../Datasets/Small_datasetPreprocessed3.parquet'
+    dataset = '../Datasets/Small_datasetPreprocessed.parquet'
 
     if os.path.exists(dataset):
         df = pd.read_parquet(dataset)

@@ -5,7 +5,7 @@ from sklearn.ensemble import IsolationForest
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-datasets = ['../Datasets/Small_dataset.parquet','../Datasets/Big_dataset.parquet']
+datasets = ['Datasets/Small_dataset.parquet','Datasets/Big_dataset.parquet']
 for dataset in datasets:
     if os.path.exists(dataset):
         # Load the CSV using dask for parallel processing
@@ -163,6 +163,6 @@ for dataset in datasets:
     #delete when total_amount is > 350
     new_df_clean = new_df_clean[new_df_clean['total_amount'] <= 350]
     print("Cleaned DataFrame shape:", new_df_clean.shape)
-    dataset_path= dataset[:-8] + 'Preprocessed3.parquet'
+    dataset_path= dataset[:-8] + 'Preprocessed.parquet'
     new_df_clean.to_parquet(dataset_path)
     print(new_df.head())
