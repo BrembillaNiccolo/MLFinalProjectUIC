@@ -164,6 +164,8 @@ cython_debug/
 
 # Datasets
 Datasets/*
+!Datasets/Small_datasetPreprocessed.parquet
+!Datasets/Small_dataset.parquet
 
 # On MacOS
 .DS_Store
