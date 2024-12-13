@@ -67,12 +67,12 @@ for dataset in datasets:
         plt.savefig('pickup_hour_distribution.png')
         plt.show()
         # Merging the weather and holidays data
-        weather = pd.read_csv('../Datasets/weather.csv')
+        weather = pd.read_csv('Datasets/weather.csv')
 
         weather=weather.drop(columns=['tmax','tmin','departure','HDD','CDD'])
         weather['date'] = pd.to_datetime(weather['date'])
 
-        holidays = pd.read_csv('../Datasets/USHoliday.csv')
+        holidays = pd.read_csv('Datasets/USHoliday.csv')
 
         #maintain only if holiday is in 2019
         holidays['Date'] = pd.to_datetime(holidays['Date'])
@@ -105,7 +105,7 @@ for dataset in datasets:
         new_df = new_df.dropna()
 
         # Merging the city zones data
-        zones = pd.read_csv('../Datasets/taxi_zone_lookup.csv')
+        zones = pd.read_csv('Datasets/taxi_zone_lookup.csv')
         zones = zones.drop(['Borough'], axis=1)
         zones = zones.drop(['Zone'], axis=1)
 
